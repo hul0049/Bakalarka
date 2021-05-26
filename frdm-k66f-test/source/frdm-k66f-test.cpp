@@ -44,12 +44,24 @@
 #include "enet.h"
 
 
+
 /* TODO: insert other include files here. */
 
 /* TODO: insert other definitions and declarations here. */
 
 TFC tfc;
 Enet enet;
+
+struct WifiFrame
+{
+        uint32_t timestamp;                        	// number of sample
+        int16_t        servo;     			// -1000/1000
+        int16_t        pwm[ 2 ];     			// -1000/1000
+        int16_t        fb[ 2 ];         		// 0-1000
+        int16_t		   dc[ 2 ];
+        int16_t		   speed;
+        uint16_t       image[ TFC_CAMERA_LINE_LENGTH ];	// line camera image
+} __attribute__((packed));
 
 #define UDP_SEND_DATA 1
 
@@ -172,14 +184,26 @@ int main(void) {
 
     PRINTF("Initializing enet...");
 
-//    enet.init(sizeof(nxpbc::SendData), 4444);
-    enet.init(5, 4444);
+
+     //enet.init(sizeof(nxpbc::SendData), 4444);
+   // enet.init(5,4444);
+    enet.init(sizeof(WifiFrame), 4444);
     PRINTF("OK\r\n");
 #endif
 
 	/* Force the counter to be placed into memory. */
 	/* Enter an infinite loop, just incrementing a counter. */
 	PRINTF("jedeme...\r\n");
+
+	WifiFrame wifiFrames;
+
+		bool saveWifi = false;
+
+		if (tfc.ImageReady(0))
+		{
+			saveWifi = true;
+		}
+
 	u_int32_t i = 0;
 	for (;;) {
         enet.check();
@@ -192,12 +216,34 @@ int main(void) {
 			Diagnostic();
 		else {
 //			enet.send(&car->sendData_, sizeof(nxpbc::SendData));
-			if(i % 100000 == 0){
+
+			/*if(i % 100000 == 0){
 				enet.send("Ahoj\n", 5);
-			}
+			}*/
 			i++;
+			if (saveWifi)
+			{
+					wifiFrames.fb[0] = (int16_t)(tfc.ReadFB_f(0)*100);
+					wifiFrames.fb[1] = (int16_t)(tfc.ReadFB_f(1)*100);
+					wifiFrames.timestamp = 0;
+					tfc.getImage(0, wifiFrames.image, TFC_CAMERA_LINE_LENGTH);
+
+					wifiFrames.pwm[0] = 5;//(int16_t)leftEngine;
+					wifiFrames.pwm[1] = 10;//(int16_t)rightEngine;
+					wifiFrames.servo = 5;//(int16_t)turning;
+					wifiFrames.dc[0]= 10;
+					wifiFrames.dc[1] = 15;
+					wifiFrames.speed = 100;
+
+							//const char *data[] = { "1420", (const char *) wifiFrames[currentWifiFrameIndex] } ; //(const char *) wifiFrame };
+							//const char *data[] = {(const char *) wifiFrames};
+							//currentWifiFrameIndex = (currentWifiFrameIndex + 1)%3;
+							//esp.cmd_start( ecmd_IPSend, data);
+					enet.send(&wifiFrames, sizeof(wifiFrames));
+			}
 			// Run MCP
 			//MasterControlProgram();
+//					enet.send("Ahoj\n", 5);
 		}
 	} // end of infinite for loop
 	return 0;

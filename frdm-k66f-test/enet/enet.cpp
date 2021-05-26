@@ -96,17 +96,17 @@ void SysTick_Handler(void)
 
 // IP Addresses
 
-#define PC 1
+#define PC 0
 
 #if PC
 /*
  * If connected directly to Windows PC
  * */
-uint8_t configIP[ 4 ] = { 169, 254, 94, 243 };
-uint8_t configNET[ 4 ] = { 255, 255, 255, 0 };
-uint8_t configGW[ 4 ] = { 169, 254, 94, 242 };
+uint8_t configIP[ 4 ] = { 169, 254, 229, 243 };
+uint8_t configNET[ 4 ] = { 255, 255, 0, 0 };
+uint8_t configGW[ 4 ] = { 169, 254, 229, 242 };
 //uint8_t configPC[ 4 ] = { 169, 254, 94, 242 }; // PC
-uint8_t configPC[ 4 ] = { 169, 254, 94, 255 }; // broadcast
+uint8_t configPC[ 4 ] = { 169, 254, 255, 255 }; // broadcast
 
 #else
 /*

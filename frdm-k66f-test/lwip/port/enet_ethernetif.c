@@ -59,7 +59,7 @@
 #include "enet_ethernetif_priv.h"
 
 #include "fsl_enet.h"
-#include "fsl_phy.h"
+#include "board/fsl_phy.h"
 
 /*******************************************************************************
  * Definitions
